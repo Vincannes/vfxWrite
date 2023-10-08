@@ -78,6 +78,12 @@ class FakeTank(object):
                 'colorspace', 'ext_render_nuke', 'name', 'Task', 'variant', 'render_source', 'write_node', 'version',
                 'colorspace', 'SEQ', 'ext_render_nuke']
 
+    def get_abstract_path(self, template, fields):
+        if template == "sequence_root":
+            return ["sh", "seq", "test"]
+        if template == "shot_root":
+            return ["sh_010", "sh_020", "sh_030"]
+
 
 class FakeTemplateKeyName(object):
     NAME_PUBLISH = 'publish'

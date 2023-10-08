@@ -43,11 +43,17 @@ class TestMikRead(unittest.TestCase):
 
     def test_resolve_template_WORK(self):
         read = self.mikread(self.image_path)
-        self.assertEqual(nuke_shot_render_sequence.work, read.resolve_template())
+        self.assertEqual(
+            nuke_shot_render_sequence.work,
+            read.resolve_template(nuke_shot_render_sequence)
+        )
 
     def test_resolve_template_PUBLISH(self):
         read = self.mikread(self.image_publish_path)
-        self.assertEqual(nuke_shot_render_sequence.publish, read.resolve_template())
+        self.assertEqual(
+            nuke_shot_render_sequence.publish,
+            read.resolve_template(nuke_shot_render_sequence)
+        )
 
     def test_get_template_from_path(self):
         read = self.mikread(self.image_path)
@@ -86,7 +92,18 @@ class TestMikRead(unittest.TestCase):
         }
         self.assertEqual(expected, read.get_settings())
 
-    # def test_get_sequences(self):
-    #     read = self.mikread(self.image_path)
-    #     expected = ["sh", "seq", "test"]
-    #     self.assertEqual(expected, read.get_values_from_key(key="Sequence"))
+    def test_get_sequences(self):
+        read = self.mikread(self.image_path)
+        expected = ["sh", "seq", "test"]
+        self.assertEqual(
+            expected,
+            read.get_values_from_key(key="Sequence")
+        )
+
+    def test_get_shots(self):
+        read = self.mikread(self.image_path)
+        expected = ["sh_010", "sh_020", "sh_030"]
+        self.assertEqual(
+            expected,
+            read.get_values_from_key(key="Shot")
+        )

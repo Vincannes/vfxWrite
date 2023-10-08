@@ -25,6 +25,8 @@ class TankWrapper(object):
     def get_fields_from_path(self, path, template=None):
         if not template:
             template = self.get_template_from_path(path)
+        if isinstance(template, str):
+            template = self.get_template(template)
         path = path.replace("\\", "/")# thank you Windobe
         path = path.replace("%04d", "####")
         return template.get_fields(path)
