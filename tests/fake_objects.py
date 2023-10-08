@@ -95,7 +95,7 @@ class FakeFieldsTemplate(object):
     def __init__(self, name, template, fields={}):
         self.name = name
         self.fields = fields
-        self.tank_tpl = template
+        self.template = template
 
     def get_key(self, key):
         return self.fields.get(key, None)

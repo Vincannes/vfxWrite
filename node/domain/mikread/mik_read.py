@@ -12,24 +12,27 @@ class MikRead(AbstractMik):
     def __init__(self, path=None):
         AbstractMik.__init__(self, path)
         self._tk = self.tank_wrapper()
-
         self._publish = False
 
         self._template = self.get_template()
         self._setting = self._generate_settings()
-        self._is_publish()
 
     def is_publish(self):
         return self._publish
 
     def get_template(self):
+        """
+        Check if path template belong to READ_CONFIG
+        :return: FieldsTemplate
+        """
         template = None
         path_template = self._tk.get_template_from_path(self._path)
+
         for read_tpl in self.READ_CONFIG:
-            read_tpl_name = self.resolve_template(read_tpl)
-            if path_template.name() != read_tpl_name.name:
-                continue
-            template = read_tpl
+            if path_template.name() == read_tpl.template.work or \
+                    path_template.name() == read_tpl.template.publish:
+                template = read_tpl
+                self._is_publish(path_template)
         return template
 
     def get_settings(self):
@@ -42,10 +45,10 @@ class MikRead(AbstractMik):
             template=template.get_key(key)
         )
 
-    def resolve_template(self, template):
+    def resolve_template(self):
         if self._publish:
-            return template.publish
-        return template.work
+            return self._template.template.publish
+        return self._template.template.work
 
     # PRIVATES
     def _generate_settings(self):
@@ -55,7 +58,7 @@ class MikRead(AbstractMik):
         )
         return fields
 
-    def _is_publish(self):
+    def _is_publish(self, template):
         self._publish = False
-        if "publish" in self._template.name.lower():
+        if "publish" in template.name().lower():
             self._publish = True
