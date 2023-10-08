@@ -39,22 +39,22 @@ class MikRead(AbstractMik):
         return self._setting
 
     def get_values_from_key(self, key):
-        template = self._template
+        template = self.resolve_template(self._template.get_key(key))
         return self._tk.get_abstract_path(
             fields=self._setting,
-            template=template.get_key(key)
+            template=template
         )
 
-    def resolve_template(self):
+    def resolve_template(self, template):
         if self._publish:
-            return self._template.template.publish
-        return self._template.template.work
+            return template.publish
+        return template.work
 
     # PRIVATES
     def _generate_settings(self):
         fields = self._tk.get_fields_from_path(
             self._path,
-            self._template
+                self.resolve_template(self._template.template)
         )
         return fields
 
