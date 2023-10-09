@@ -87,10 +87,7 @@ class MikWriteNodeWidget(QtWidgets.QWidget):
         new_fields = {}
         self.mikwrite.set_element(self.elementButton.isChecked())
         for tank_id, combo in self._combo_fields.items():
-            print(combo.get_value())
             new_fields[tank_id] = combo.get_value()
-        print("new_fields")
-        pprint(new_fields)
         self.mikwrite.update_settings(new_fields)
         path = self.mikwrite.generate_path()
         self.computedPath.setText(path)
