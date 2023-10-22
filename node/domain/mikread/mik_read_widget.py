@@ -49,7 +49,7 @@ class MikReadNodeWidget(QtWidgets.QWidget):
         self.mainLayout.addWidget(titleWidget)
         self._build_head()
         self.mainLayout.addSpacing(self.SPACE_WIDGET_SIZE)
-        # self._build_settings()
+        self._build_settings()
         self.mainLayout.addSpacing(self.SPACE_WIDGET_SIZE)
         self._build_foot()
         self.setLayout(self.mainLayout)
@@ -61,19 +61,52 @@ class MikReadNodeWidget(QtWidgets.QWidget):
         pass
 
     def set_connections(self):
-        self.pathChanged.connect(self.update_write_path_widget)
+        self.source_combo.currentIndexChanged.connect(self.update_setting_fields)
+        # self.pathChanged.connect(self.update_write_path_widget)
 
     # CONNECTIONS
 
     @QtCore.Slot()
     def update_write_path_widget(self):
         new_fields = {}
-        self.mikwrite.set_element(self.elementButton.isChecked())
         for tank_id, combo in self._combo_fields.items():
             new_fields[tank_id] = combo.get_value()
-        self.mikwrite.update_settings(new_fields)
-        path = self.mikwrite.generate_path()
-        self.computedPath.setText(path)
+        pprint(new_fields)
+        # self.mikwrite.update_settings(new_fields)
+        # path = self.mikread.generate_path()
+        # self.computedPath.setText(path)
+
+    @QtCore.Slot(object)
+    def update_combo_widget(self, index, combo_box):
+
+        value = combo_box.get_value()
+        tank_id = combo_box.key.tank_id
+
+        fields = {}
+        combo_dependent = combo_box.dependent
+
+        for dependence in combo_dependent:
+            combo = self._combo_fields.get(dependence, [])
+            fields[dependence] = combo.get_value()
+
+        fields[tank_id] = value
+        combo_to_update = {}
+        for name, setting_combo in self._combo_fields.items():
+            if name in combo_dependent or name == tank_id:
+                continue
+            combo_to_update[name] = setting_combo
+            fields[name] = None
+
+        for name, setting_combo in combo_to_update.items():
+            value = setting_combo.field_combo.mikdata.get_values_from_key(name, fields)
+            print("")
+            print("new combo field", name, value)
+            setting_combo.fill_combo(value)
+
+    @QtCore.Slot(int)
+    def update_setting_fields(self, index):
+        template = self.source_combo.itemData(index)
+        print(template)
 
     # PRIVATES
 
@@ -89,14 +122,26 @@ class MikReadNodeWidget(QtWidgets.QWidget):
         vlayout.addSpacing(self.SPACE_WIDGET_SIZE)
         vlayout.addWidget(self.refresh_button)
         self.mainLayout.addLayout(vlayout)
+        self._build_source_combo()
+
+    def _build_source_combo(self):
+        for key in config.READ_CONFIGS:
+            self.source_combo.addItem(key.name, key)
 
     def _build_settings(self):
-        for key in config.READ_CONFIGS:
-            combo = FieldComboWidget(key, self.fields_scene, self.node)
-            combo.widget.activated.connect(self.pathChanged)
+        template_fields = self.source_combo.currentData()
+        for key_name, key in template_fields.fields.items():
+            combo = FieldComboWidget(key, self.mikread, self.node, True)
+            combo.widget.activated.connect(
+                lambda index, cb=combo: self.update_combo_widget(index, cb)
+            )
+            # combo.fill_combo()
             self._combo_fields[key.tank_id] = combo
             self.setting_layout.addLayout(combo)
         self.mainLayout.addLayout(self.setting_layout)
+
+        for combo in self._combo_fields.values():
+            combo.connect_dependencies(self._combo_fields)
 
     def _build_foot(self):
         self.computedPath.setReadOnly(True)

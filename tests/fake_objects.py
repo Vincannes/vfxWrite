@@ -56,6 +56,12 @@ class FakeTank(object):
             return fields_3
         if path == "path/scene/root.nk":
             return fields_4
+        if path in ["sh_010", "sh_020", "sh_030"]:
+            return {"Sequence": "sh", "Shot": path}
+        if path in ["/path/sequence/sh", "/path/sequence/seq", "/path/sequence/test"]:
+            return {"Sequence": path.split("/")[-1]}
+        if path in ["/path/task/cmp", "/path/task/vzero"]:
+            return {"Sequence": "test", "Shot": "Test", "Task": path.split("/")[-1]}
         else:
             return fields_2
 
@@ -80,9 +86,11 @@ class FakeTank(object):
 
     def get_abstract_path(self, template, fields):
         if template == "sequence_root":
-            return ["sh", "seq", "test"]
+            return ["/path/sequence/sh", "/path/sequence/seq", "/path/sequence/test"]
         if template == "shot_root":
             return ["sh_010", "sh_020", "sh_030"]
+        if template == "shot_task_root":
+            return ["/path/task/cmp", "/path/task/vzero"]
 
 
 class FakeTemplateKeyName(object):
@@ -109,8 +117,57 @@ class FakeFieldsTemplate(object):
 
 class FakeFieldKey(object):
 
-    def __init__(self, tank_id, label, values=None, preferencie=None):
+    def __init__(self, tank_id, label, values=None, dependencies=None, preferencie=None, template=None):
         self.tank_id = tank_id
         self.label = label
         self.values = values
+        self.template = template
+        self.dependencies = dependencies
         self.preferencie = preferencie
+
+
+nuke_shot_render_sequence = FakeTemplateKeyName(
+    work="Shot_NukeRender_Work_Sequence",
+    publish="Shot_NukeRender_Publish_Sequence"
+)
+seq_tpl = FakeTemplateKeyName("sequence_root")
+shot_tpl = FakeTemplateKeyName("shot_root")
+task_tpl = FakeTemplateKeyName("shot_task_root")
+version_tpl = FakeTemplateKeyName("shot_task_root")
+
+seq = FakeFieldKey("Sequence", "", template=seq_tpl)
+shot = FakeFieldKey("Shot", "", template=shot_tpl, dependencies=["Sequence"])
+task = FakeFieldKey("Task", "", template=task_tpl, dependencies=["Shot"])
+version = FakeFieldKey("version", "", template=version_tpl, dependencies=["Task"])
+colorspace = FakeFieldKey("colorspace", "", template=version_tpl, dependencies=["version"])
+extension = FakeFieldKey("ext_render_nuke", "", template=version_tpl, dependencies=["version", "colorspace"])
+
+
+read1 = FakeFieldsTemplate(
+    name="Nuke Shot",
+    template=nuke_shot_render_sequence,
+    fields={
+        "Sequence": seq,
+        "Shot": shot,
+        "Task": task,
+    }
+)
+
+read2 = FakeFieldsTemplate(
+    name="Plate",
+    template=FakeTemplateKeyName("Hiero_Footage_Sequence"),
+    fields={
+        "Sequence": seq,
+        "Shot": shot,
+        "Task": task,
+        "variant": task,
+        "version": version,
+        "colorspace": colorspace,
+        "ext_render_nuke": extension,
+    }
+)
+
+FAKE_CONFIGS = [
+    read1,
+    read2
+]

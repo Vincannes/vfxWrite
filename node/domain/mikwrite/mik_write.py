@@ -21,6 +21,9 @@ class MikWrite(AbstractMik):
     def is_element(self):
         return self._is_element
 
+    def get_values_from_key(self, key, fields=None):
+        pass
+
     def generate_path(self):
         self._build_path = self._build_path_from_fields()
         return self._build_path

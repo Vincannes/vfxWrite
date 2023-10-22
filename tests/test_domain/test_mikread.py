@@ -1,34 +1,6 @@
 import unittest
 from node.domain.mikread import MikRead
-from tests.fake_objects import FakeTank, FakeTemplate, FakeTemplateKeyName, FakeFieldsTemplate
-
-nuke_shot_render_sequence = FakeTemplateKeyName(
-    work="Shot_NukeRender_Work_Sequence",
-    publish="Shot_NukeRender_Publish_Sequence"
-)
-seq = FakeTemplateKeyName("sequence_root")
-shot = FakeTemplateKeyName("shot_root")
-task = FakeTemplateKeyName("shot_task_root")
-
-read1 = FakeFieldsTemplate(
-    "Nuke Shot",
-    nuke_shot_render_sequence,
-    fields={
-        "Sequence": seq,
-        "Shot": shot,
-        "Task": task,
-    }
-)
-
-read2 = FakeFieldsTemplate(
-    "Plate",
-    FakeTemplateKeyName("Hiero_Footage_Sequence")
-)
-
-FAKE_CONFIGS = [
-    read1,
-    read2
-]
+from tests.fake_objects import *
 
 
 class TestMikRead(unittest.TestCase):
@@ -107,3 +79,13 @@ class TestMikRead(unittest.TestCase):
             expected,
             read.get_values_from_key(key="Shot")
         )
+
+    def test_get_tasks(self):
+        read = self.mikread(self.image_path)
+        expected = ["cmp", "vzero"]
+        self.assertEqual(
+            expected,
+            read.get_values_from_key(key="Task")
+        )
+
+

@@ -1,4 +1,4 @@
-from node.domain.config.field import FieldKey
+from node.domain.config.models import FieldKey
 
 # Config Write Node Interface
 sequence = FieldKey("Sequence", "Sequence Name")

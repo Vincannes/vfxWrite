@@ -107,7 +107,7 @@ class MikWriteNodeWidget(QtWidgets.QWidget):
 
     def _build_settings(self):
         for key in config.WRITE_CONFIGS:
-            combo = FieldComboWidget(key, self.fields_scene, self.node)
+            combo = FieldComboWidget(key, self.mikwrite, self.node)
             combo.widget.activated.connect(self.pathChanged)
             self._combo_fields[key.tank_id] = combo
             self.setting_layout.addLayout(combo)

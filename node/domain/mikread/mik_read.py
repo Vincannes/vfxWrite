@@ -38,14 +38,47 @@ class MikRead(AbstractMik):
     def get_settings(self):
         return self._setting
 
-    def get_values_from_key(self, key):
-        template = self.resolve_template(self._template.get_key(key))
-        return self._tk.get_abstract_path(
-            fields=self._setting,
+    def get_values_from_key(self, key, fields=None):
+        if fields is None:
+            fields = {}
+        match = []
+        setting = self._setting.copy()
+
+        # add custom token from field
+        for token, value in fields.items():
+            if value is None:
+                setting.pop(token)
+            else:
+                setting[token] = value
+
+        # remove key from setting because we look for this one
+        if key in setting.keys():
+            setting.pop(key)
+
+        # get FieldsTemplate name
+        tank_template_name = self._template.get_key(key).template
+        # get TemplateKeyName
+        template = self.resolve_template(tank_template_name)
+        # get all matching paths
+        template_paths = self._tk.get_abstract_path(
+            fields=setting,
             template=template
         )
 
+        # filter and get matched keys from paths
+        for path in template_paths:
+            fields = self._tk.get_fields_from_path(path)
+            value = fields.get(key)
+            if value not in match:
+                match.append(value)
+
+        return match
+
     def resolve_template(self, template):
+        """
+        :param template: [TemplateKeyName]
+        :return: [str] Tank Template Name
+        """
         if self._publish:
             return template.publish
         return template.work
@@ -54,7 +87,7 @@ class MikRead(AbstractMik):
     def _generate_settings(self):
         fields = self._tk.get_fields_from_path(
             self._path,
-                self.resolve_template(self._template.template)
+            self.resolve_template(self._template.template)
         )
         return fields
 

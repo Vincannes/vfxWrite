@@ -23,9 +23,11 @@ class FieldsTemplate(object):
 
 class FieldKey(object):
 
-    def __init__(self, tank_id, label, values=None, preferencie=None):
+    def __init__(self, tank_id, label, values=None, preferencie=None, template=None, dependencies=None):
         self.tank_id = tank_id
         self.label = label
         self.values = values
+        self.template = template
         self.preferencie = preferencie
+        self.dependencies = dependencies
 

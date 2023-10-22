@@ -1,8 +1,10 @@
+import re
 import sys
 
 sys.path.append("D:\\Desk\\python\\Tank\\python")
 import sgtk
 
+REGEX_FRAME = r"\.(\d+)\."
 
 class TankWrapper(object):
 
@@ -14,6 +16,10 @@ class TankWrapper(object):
         return self.templates[name]
 
     def get_template_from_path(self, path):
+        try:
+            path = re.sub(REGEX_FRAME, '.%04d.', path)
+        except:
+            pass
         path = path.replace("%04d", "####")
         return self._tk.template_from_path(path)
 
@@ -27,9 +33,13 @@ class TankWrapper(object):
             template = self.get_template_from_path(path)
         if isinstance(template, str):
             template = self.get_template(template)
-        path = path.replace("\\", "/")# thank you Windobe
-        path = path.replace("%04d", "####")
-        return template.get_fields(path)
+        result_string = path.replace("\\", "/")# thank you Windobe
+        try:
+            result_string = re.sub(REGEX_FRAME, '.%04d.', result_string)
+        except:
+            pass
+        result_string = result_string.replace("%04d", "####")
+        return template.get_fields(result_string)
 
     def get_abstract_path(self, template, fields):
         if isinstance(template, str):

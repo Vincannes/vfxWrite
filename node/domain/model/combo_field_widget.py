@@ -1,26 +1,31 @@
 from PySide2 import QtWidgets, QtCore, QtGui
 
 from node.domain import config
+from node.domain.model.combo_field import FieldCombo
 
 
 class FieldComboWidget(QtWidgets.QHBoxLayout):
-    KEYS_EDITABLE = [config.category, config.colorspace, config.extension]
+    WRITE_KEYS_EDITABLE = [
+        config.category,
+        config.colorspace,
+        config.extension
+    ]
 
-    def __init__(self, key, fields, node):
+    def __init__(self, key, mikdata, node, is_editable=False):
         super(self.__class__, self).__init__()
 
         self.key = key
         self.node = node
-        self.fields = fields
+        # self.mikdata = mikdata
 
-        # default values from config
-        self.values = self.key.values if self.key.values else ()
+        self.field_combo = FieldCombo(key, mikdata)
+        self.values = self.field_combo.values
 
         self.combo = QtWidgets.QComboBox()
         label = QtWidgets.QLabel(self.key.label)
 
         label.setMaximumWidth(100)
-        if key not in self.KEYS_EDITABLE:
+        if not is_editable and key not in self.WRITE_KEYS_EDITABLE:
             self.combo.setEnabled(False)
 
         self.addWidget(label)
@@ -33,31 +38,69 @@ class FieldComboWidget(QtWidgets.QHBoxLayout):
     def widget(self):
         return self.combo
 
-    def set_default_value(self):
+    @property
+    def dependent(self):
+        return self.field_combo.get_dependent()
 
+    def connect_dependencies(self, combos):
+        self.field_combo.all_combos = combos
+
+    def set_default_value(self):
+        """
+        :return:
+        """
         if self.key.tank_id == "write_node":
             self.combo.addItems([self.node.name()])
             pass
 
         # set defaults values
-        self.combo.addItems(self.values)
+        if not self.values:
+            return
+        self.combo.addItems(self.field_combo.values)
 
         # set preferencies
-        preferencies_value = self.key.preferencie if self.key.preferencie else None
+        preferencies_value = self.field_combo.preferencies
         if preferencies_value:
             self.combo.setCurrentIndex(self.values.index(preferencies_value))
 
     def set_value(self, value=None):
+        """
+        :return:
+        """
         if not value:
-            value = self.fields.get(self.key.tank_id, None)
+            value = self.field_combo.fields.get(self.key.tank_id, None)
 
+        # if value in config FieldKey.values
         if value in self.values:
             self.combo.setCurrentIndex(self.values.index(value))
+        # if value already in Combobox
         elif value in [self.combo.itemText(i) for i in range(self.combo.count())]:
-            self.values + (value,)
+            self.values = self.values + (value,)
             self.combo.setCurrentIndex(self.values.index(value))
+        # if not in Combobox and not in config FieldKey.values
         elif value is not None:
             self.combo.addItems([value])
 
     def get_value(self):
+        """
+        :return:
+        """
         return str(self.combo.currentText())
+
+    def fill_combo(self, values=None):
+        """
+        :return:
+        """
+        curr_value = self.combo.currentText()
+        if not values:
+            values = self.field_combo.mikdata.get_values_from_key(
+                self.key.tank_id,
+            )
+        if not values:
+            return
+        self.combo.clear()
+        self.values = values
+        self.combo.addItems(values)
+        if curr_value not in values:
+            curr_value = values[0]
+        self.set_value(curr_value)
