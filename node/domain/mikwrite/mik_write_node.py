@@ -1,4 +1,4 @@
-import os
+import nuke
 
 from node.domain.ports.abs_mik_node import AbstractMikNode
 
@@ -17,7 +17,7 @@ class MikWriteNode(AbstractMikNode):
         return nuke.PyCustom_Knob(
             self.GUI_WIDGET_NAME,
             '',
-            "{}.MikWriteNodeWidget({})".format(self.module, self._out)
+            "{}.MikWriteNodeWidget(is_out={})".format(self.module, self._out)
         )
 
     def node_settings(self):

@@ -3,7 +3,7 @@ from pprint import pprint
 from PySide2 import QtWidgets, QtCore, QtGui
 
 from node.domain import config
-# from node.domain.mikwrite.mik_write import MikWrite
+from node.domain.mikread import MikRead
 from node.domain.model.combo_field_widget import FieldComboWidget
 
 
@@ -25,20 +25,19 @@ class MikReadNodeWidget(QtWidgets.QWidget):
 
         self._combo_fields = {}
 
-        # self.mikwrite = MikWrite(self.path)
-        # self.mikwrite.set_element(is_shot_node)
-        # self.fields_scene = self.mikwrite.get_settings()
-        #
-        # self.mainLayout = QtWidgets.QVBoxLayout()
-        # self.setting_layout = QtWidgets.QVBoxLayout()
-        # self.stackedWidgets = QtWidgets.QStackedWidget()
-        # self.computedPath = QtWidgets.QTextEdit()
+        self.mikread = MikRead(self.path)
+        self.fields_scene = self.mikread.get_settings()
 
-        # self.elementButton = QtWidgets.QRadioButton('Element')
-        # self.shotButton = QtWidgets.QRadioButton('Shot' if self.isCompShot() else 'Asset')
+        self.mainLayout = QtWidgets.QVBoxLayout()
+        self.setting_layout = QtWidgets.QVBoxLayout()
+        self.stackedWidgets = QtWidgets.QStackedWidget()
+        self.computedPath = QtWidgets.QTextEdit()
 
-        # self.build_ui()
-        # self.set_connections()
+        self.source_combo = QtWidgets.QComboBox()
+        self.refresh_button = QtWidgets.QPushButton("Refresh")
+
+        self.build_ui()
+        self.set_connections()
         # self.update_type_source_buttons(is_out)
         # self.update_write_path_widget()
 
@@ -46,7 +45,7 @@ class MikReadNodeWidget(QtWidgets.QWidget):
         return self.fields_scene.get("Shot", False)
 
     def build_ui(self):
-        titleWidget = QtWidgets.QLabel('Write version synchronized with current comp or with an existing version')
+        titleWidget = QtWidgets.QLabel("Browse disk with filters")
         self.mainLayout.addWidget(titleWidget)
         self._build_head()
         self.mainLayout.addSpacing(self.SPACE_WIDGET_SIZE)
@@ -62,38 +61,32 @@ class MikReadNodeWidget(QtWidgets.QWidget):
         pass
 
     def set_connections(self):
-        self.elementButton.pressed.connect(lambda: self.update_type_source_buttons(isShot=False))
-        self.shotButton.pressed.connect(lambda: self.update_type_source_buttons(isShot=True))
-        # self.elementButton.toggled.connect(self.pathChanged)
-        # self.shotButton.toggled.connect(self.pathChanged)
+        self.source_combo.currentIndexChanged.connect(self.update_setting_fields)
         self.pathChanged.connect(self.update_write_path_widget)
 
     # CONNECTIONS
 
     @QtCore.Slot()
-    def update_type_source_buttons(self, isShot):
-        if not isShot:
-            self.elementButton.setChecked(True)
-        else:
-            self.shotButton.setChecked(True)
-
-        combo_element = self._combo_fields.get(config.category.tank_id)
-        combo_value = 'nkelem' if not isShot else combo_element.values[0]
-        combo_element.set_value(combo_value)
-        self.update_write_path_widget()
-
-    @QtCore.Slot()
     def update_write_path_widget(self):
         new_fields = {}
-        self.mikwrite.set_element(self.elementButton.isChecked())
         for tank_id, combo in self._combo_fields.items():
-            print(combo.get_value())
             new_fields[tank_id] = combo.get_value()
-        print("new_fields")
         pprint(new_fields)
-        self.mikwrite.update_settings(new_fields)
-        path = self.mikwrite.generate_path()
-        self.computedPath.setText(path)
+        # self.mikwrite.update_settings(new_fields)
+        # path = self.mikread.generate_path()
+        # self.computedPath.setText(path)
+
+    @QtCore.Slot(object)
+    def update_combo_widget(self, index, combo_box):
+        template_name = self.source_combo.currentData()
+        print(template_name.name)
+        combo_box.field_combo.update_dependencies()
+
+    @QtCore.Slot(int)
+    def update_setting_fields(self, index):
+        template_name = self.source_combo.itemData(index)
+        self._clear_layout(self.setting_layout)
+        self._build_settings()
 
     # PRIVATES
 
@@ -102,19 +95,35 @@ class MikReadNodeWidget(QtWidgets.QWidget):
         vlayout.setAlignment(QtCore.Qt.AlignHCenter)
         hlayout = QtWidgets.QHBoxLayout()
         self.mainLayout.addSpacing(self.SPACE_WIDGET_SIZE)
-        hlayout.addWidget(self.shotButton)
-        hlayout.addWidget(self.elementButton)
+        label = QtWidgets.QLabel("Source")
+        hlayout.addWidget(label)
+        hlayout.addWidget(self.source_combo)
         vlayout.addLayout(hlayout)
-
+        vlayout.addSpacing(self.SPACE_WIDGET_SIZE)
+        vlayout.addWidget(self.refresh_button)
         self.mainLayout.addLayout(vlayout)
+        self._build_source_combo()
+
+    def _build_source_combo(self):
+        for key in config.READ_CONFIGS:
+            self.source_combo.addItem(key.name, key)
 
     def _build_settings(self):
-        for key in config.WRITE_CONFIGS:
-            combo = FieldComboWidget(key, self.fields_scene, self.node)
-            combo.widget.activated.connect(self.pathChanged)
+        # reset self._combo_fields
+        self._combo_fields = {}
+        template_fields = self.source_combo.currentData()
+        for key_name, key in template_fields.tokens.items():
+            combo = FieldComboWidget(key, self.mikread, self.node, True)
+            combo.widget.activated.connect(
+                lambda index, cb=combo: self.update_combo_widget(index, cb)
+            )
+            # combo.
             self._combo_fields[key.tank_id] = combo
             self.setting_layout.addLayout(combo)
         self.mainLayout.addLayout(self.setting_layout)
+
+        for combo in self._combo_fields.values():
+            combo.connect_dependencies(self._combo_fields)
 
     def _build_foot(self):
         self.computedPath.setReadOnly(True)
@@ -135,3 +144,11 @@ class MikReadNodeWidget(QtWidgets.QWidget):
         group.setLayout(hlayout)
         return group
 
+    def _clear_layout(self, layout):
+        while layout.count():
+            child = layout.takeAt(0)
+            if child is not None:
+                child.combo_widget.deleteLater()
+                child.label_widget.deleteLater()
+            elif child.layout() is not None:
+                self._clear_layout(child.layout())
