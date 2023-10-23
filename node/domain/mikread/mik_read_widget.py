@@ -62,7 +62,7 @@ class MikReadNodeWidget(QtWidgets.QWidget):
 
     def set_connections(self):
         self.source_combo.currentIndexChanged.connect(self.update_setting_fields)
-        # self.pathChanged.connect(self.update_write_path_widget)
+        self.pathChanged.connect(self.update_write_path_widget)
 
     # CONNECTIONS
 
@@ -83,7 +83,9 @@ class MikReadNodeWidget(QtWidgets.QWidget):
     @QtCore.Slot(int)
     def update_setting_fields(self, index):
         template = self.source_combo.itemData(index)
-        print(template)
+        # print(template)
+        self._clear_layout(self.setting_layout)
+        self._build_settings()
 
     # PRIVATES
 
@@ -107,11 +109,12 @@ class MikReadNodeWidget(QtWidgets.QWidget):
 
     def _build_settings(self):
         template_fields = self.source_combo.currentData()
-        for key_name, key in template_fields.fields.items():
+        for key_name, key in template_fields.tokens.items():
             combo = FieldComboWidget(key, self.mikread, self.node, True)
             combo.widget.activated.connect(
                 lambda index, cb=combo: self.update_combo_widget(index, cb)
             )
+            # combo.
             self._combo_fields[key.tank_id] = combo
             self.setting_layout.addLayout(combo)
         self.mainLayout.addLayout(self.setting_layout)
@@ -138,3 +141,11 @@ class MikReadNodeWidget(QtWidgets.QWidget):
         group.setLayout(hlayout)
         return group
 
+    def _clear_layout(self, layout):
+        while layout.count():
+            child = layout.takeAt(0)
+            if child is not None:
+                child.combo_widget.deleteLater()
+                child.label_widget.deleteLater()
+            elif child.layout() is not None:
+                self._clear_layout(child.layout())

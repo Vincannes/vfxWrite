@@ -106,13 +106,13 @@ class FakeTemplateKeyName(object):
 
 class FakeFieldsTemplate(object):
 
-    def __init__(self, name, template, fields={}):
+    def __init__(self, name, template, tokens={}):
         self.name = name
-        self.fields = fields
+        self.tokens = tokens
         self.template = template
 
     def get_key(self, key):
-        return self.fields.get(key, None)
+        return self.tokens.get(key, None)
 
 
 class FakeFieldKey(object):
@@ -181,7 +181,7 @@ extension = FakeFieldKey("ext_render_nuke", "", template=version_tpl, dependenci
 read1 = FakeFieldsTemplate(
     name="Nuke Shot",
     template=nuke_shot_render_sequence,
-    fields={
+    tokens={
         "Sequence": seq,
         "Shot": shot,
         "Task": task,
@@ -191,7 +191,7 @@ read1 = FakeFieldsTemplate(
 read2 = FakeFieldsTemplate(
     name="Plate",
     template=FakeTemplateKeyName("Hiero_Footage_Sequence"),
-    fields={
+    tokens={
         "Sequence": seq,
         "Shot": shot,
         "Task": task,

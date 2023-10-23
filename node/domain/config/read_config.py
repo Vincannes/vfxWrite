@@ -27,7 +27,7 @@ extension = FieldKey("ext_render_nuke", "Extension", values=('jpg', 'dpx', 'exr'
 nuke_shot = FieldsTemplate(
     name="Nuke Shot",
     template=nuke_shot_render_sequence,
-    fields={
+    tokens={
         "Sequence": sequence,
         "Shot": shot,
         "Task": task,
@@ -42,11 +42,11 @@ nuke_shot = FieldsTemplate(
 nuke_master = FieldsTemplate(
     name="Plate Master",
     template=footage_root,
-    fields={
+    tokens={
         "Sequence": sequence,
         "Shot": shot,
-        "Task": step_root,
-        "variant": task,
+        "Task": task,
+        "variant": variant,
         "version": version,
         "colorspace": colorspace,
         "ext_render_nuke": extension,

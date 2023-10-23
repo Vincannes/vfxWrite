@@ -12,13 +12,13 @@ class TemplateKeyName(object):
 
 class FieldsTemplate(object):
 
-    def __init__(self, name, template, fields={}):
+    def __init__(self, name, template, tokens={}):
         self.name = name
-        self.fields = fields
+        self.tokens = tokens
         self.template = template
 
     def get_key(self, key):
-        return self.fields.get(key, None)
+        return self.tokens.get(key, None)
 
 
 class FieldKey(object):
