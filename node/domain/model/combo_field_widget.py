@@ -16,7 +16,7 @@ class FieldComboWidget(QtWidgets.QHBoxLayout):
 
         self.key = key
         self.node = node
-        print("key", key)
+
         self.field_combo = FieldCombo(key, mikdata)
         self.values = self.field_combo.values
 

@@ -78,12 +78,13 @@ class MikReadNodeWidget(QtWidgets.QWidget):
 
     @QtCore.Slot(object)
     def update_combo_widget(self, index, combo_box):
+        template_name = self.source_combo.currentData()
+        print(template_name.name)
         combo_box.field_combo.update_dependencies()
 
     @QtCore.Slot(int)
     def update_setting_fields(self, index):
-        template = self.source_combo.itemData(index)
-        # print(template)
+        template_name = self.source_combo.itemData(index)
         self._clear_layout(self.setting_layout)
         self._build_settings()
 
@@ -108,6 +109,8 @@ class MikReadNodeWidget(QtWidgets.QWidget):
             self.source_combo.addItem(key.name, key)
 
     def _build_settings(self):
+        # reset self._combo_fields
+        self._combo_fields = {}
         template_fields = self.source_combo.currentData()
         for key_name, key in template_fields.tokens.items():
             combo = FieldComboWidget(key, self.mikread, self.node, True)
