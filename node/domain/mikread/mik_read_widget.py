@@ -78,30 +78,7 @@ class MikReadNodeWidget(QtWidgets.QWidget):
 
     @QtCore.Slot(object)
     def update_combo_widget(self, index, combo_box):
-
-        value = combo_box.get_value()
-        tank_id = combo_box.key.tank_id
-
-        fields = {}
-        combo_dependent = combo_box.dependent
-
-        for dependence in combo_dependent:
-            combo = self._combo_fields.get(dependence, [])
-            fields[dependence] = combo.get_value()
-
-        fields[tank_id] = value
-        combo_to_update = {}
-        for name, setting_combo in self._combo_fields.items():
-            if name in combo_dependent or name == tank_id:
-                continue
-            combo_to_update[name] = setting_combo
-            fields[name] = None
-
-        for name, setting_combo in combo_to_update.items():
-            value = setting_combo.field_combo.mikdata.get_values_from_key(name, fields)
-            print("")
-            print("new combo field", name, value)
-            setting_combo.fill_combo(value)
+        combo_box.field_combo.update_dependencies()
 
     @QtCore.Slot(int)
     def update_setting_fields(self, index):
@@ -135,7 +112,6 @@ class MikReadNodeWidget(QtWidgets.QWidget):
             combo.widget.activated.connect(
                 lambda index, cb=combo: self.update_combo_widget(index, cb)
             )
-            # combo.fill_combo()
             self._combo_fields[key.tank_id] = combo
             self.setting_layout.addLayout(combo)
         self.mainLayout.addLayout(self.setting_layout)

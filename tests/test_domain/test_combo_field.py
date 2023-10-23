@@ -3,33 +3,11 @@ from node.domain.model.combo_field import FieldCombo
 from tests.fake_objects import *
 
 
-class FakeMikRead(object):
-
-    def __init__(self, path=None):
-        pass
-
-    def get_settings(self):
-        return {"Shot": "sh_010", "Sequence": "sh"}
-
-    def get_values_from_key(self, tank_id):
-        if tank_id == "Sequence":
-            return "sh"
-        elif tank_id == "Shot":
-            return "sh_010"
-        elif tank_id == "Task":
-            return ["cmp", "vzero"]
-        elif tank_id == "version":
-            return ["1", "2"]
-        elif tank_id == "colorspace":
-            return ["aces"]
-        elif tank_id == "ext_render_nuke":
-            return ["test", "exr"]
-
-
 class TestFieldComboWidget(unittest.TestCase):
 
     def setUp(self) -> None:
         mik_read = FakeMikRead()
+
         self.seq_combo = FieldCombo(seq, mik_read)
         self.shot_combo = FieldCombo(shot, mik_read)
         self.task_combo = FieldCombo(task, mik_read)
@@ -37,13 +15,26 @@ class TestFieldComboWidget(unittest.TestCase):
         self.color_combo = FieldCombo(colorspace, mik_read)
         self.ext_combo = FieldCombo(extension, mik_read)
 
+        seqWidget = FakeFieldComboWidget(seq)
+        seqWidget.field_combo = self.seq_combo
+        shotWidget = FakeFieldComboWidget(shot)
+        shotWidget.field_combo = self.shot_combo
+        taskWidget = FakeFieldComboWidget(task)
+        taskWidget.field_combo = self.task_combo
+        versionWidget = FakeFieldComboWidget(version)
+        versionWidget.field_combo = self.vers_combo
+        colorWidget = FakeFieldComboWidget(colorspace)
+        colorWidget.field_combo = self.color_combo
+        extWidget = FakeFieldComboWidget(extension)
+        extWidget.field_combo = self.ext_combo
+
         all_combos = {
-            "Sequence": self.seq_combo,
-            "Shot": self.shot_combo,
-            "Task": self.task_combo,
-            "version": self.vers_combo,
-            "colorspace": self.color_combo,
-            "ext_render_nuke": self.ext_combo,
+            "Sequence": seqWidget,
+            "Shot": shotWidget,
+            "Task": taskWidget,
+            "version": versionWidget,
+            "colorspace": colorWidget,
+            "ext_render_nuke": extWidget,
         }
 
         self.seq_combo.all_combos = all_combos

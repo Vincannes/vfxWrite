@@ -126,6 +126,42 @@ class FakeFieldKey(object):
         self.preferencie = preferencie
 
 
+class FakeMikRead(object):
+
+    def __init__(self, path=None):
+        pass
+
+    def get_settings(self):
+        return {"Shot": "sh_010", "Sequence": "sh"}
+
+    def get_values_from_key(self, tank_id, fields=None):
+        if tank_id == "Sequence":
+            return "sh"
+        elif tank_id == "Shot":
+            return "sh_010"
+        elif tank_id == "Task":
+            return ["cmp", "vzero"]
+        elif tank_id == "version":
+            return ["1", "2"]
+        elif tank_id == "colorspace":
+            return ["aces"]
+        elif tank_id == "ext_render_nuke":
+            return ["test", "exr"]
+
+
+class FakeFieldComboWidget(object):
+
+    def __init__(self, key):
+        self.key = key
+        self.field_combo = None
+
+    def get_value(self):
+        return ""
+
+    def set_values(self, values):
+        pass
+
+
 nuke_shot_render_sequence = FakeTemplateKeyName(
     work="Shot_NukeRender_Work_Sequence",
     publish="Shot_NukeRender_Publish_Sequence"
@@ -141,7 +177,6 @@ task = FakeFieldKey("Task", "", template=task_tpl, dependencies=["Shot"])
 version = FakeFieldKey("version", "", template=version_tpl, dependencies=["Task"])
 colorspace = FakeFieldKey("colorspace", "", template=version_tpl, dependencies=["version"])
 extension = FakeFieldKey("ext_render_nuke", "", template=version_tpl, dependencies=["version", "colorspace"])
-
 
 read1 = FakeFieldsTemplate(
     name="Nuke Shot",

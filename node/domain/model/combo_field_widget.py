@@ -32,6 +32,7 @@ class FieldComboWidget(QtWidgets.QHBoxLayout):
         self.addWidget(self.combo)
 
         self.set_default_value()
+        self.set_values()
         self.set_value()
 
     @property
@@ -81,26 +82,18 @@ class FieldComboWidget(QtWidgets.QHBoxLayout):
         elif value is not None:
             self.combo.addItems([value])
 
+    def set_values(self, values=None):
+        if values is None:
+            values = self.field_combo.get_values()
+        self.values = values
+        self.combo.clear()
+        if len(values) == 0:
+            pass
+        self.combo.addItems(values)
+
     def get_value(self):
         """
         :return:
         """
         return str(self.combo.currentText())
 
-    def fill_combo(self, values=None):
-        """
-        :return:
-        """
-        curr_value = self.combo.currentText()
-        if not values:
-            values = self.field_combo.mikdata.get_values_from_key(
-                self.key.tank_id,
-            )
-        if not values:
-            return
-        self.combo.clear()
-        self.values = values
-        self.combo.addItems(values)
-        if curr_value not in values:
-            curr_value = values[0]
-        self.set_value(curr_value)
