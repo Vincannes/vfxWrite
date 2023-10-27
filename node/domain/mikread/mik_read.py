@@ -17,48 +17,48 @@ class MikRead(AbstractMik):
         self._template = self.get_template()
         self._setting = self._generate_settings()
 
-    def is_publish(self):
-        return self._publish
+    def generate_path(self):
+        return self._tk.build_path_from_template(
+            self.resolve_template(self._template.template),
+            self._setting
+        )
 
     def get_template(self):
         """
         Check if path template belong to READ_CONFIG
         :return: FieldsTemplate
         """
-        template = None
         path_template = self._tk.get_template_from_path(self._path)
-
-        for read_tpl in self.READ_CONFIG:
-            if path_template.name() == read_tpl.template.work or \
-                    path_template.name() == read_tpl.template.publish:
-                template = read_tpl
-                self._is_publish(path_template)
-        return template
+        return self._get_template_from_config(path_template)
 
     def get_settings(self):
         return self._setting
 
     def get_values_from_key(self, key, fields=None):
         if fields is None:
-            fields = {}
+            fields = self._setting.copy()
+
         match = []
-        setting = self._setting.copy()
+        setting = {}
 
         # add custom token from field
         for token, value in fields.items():
-            if value is None:
+            if value is None and token in setting.keys():
                 setting.pop(token)
             else:
-                setting[token] = value
+                if value is None:
+                    continue
+                setting[token] = self._setting[token]
 
         # remove key from setting because we look for this one
         if key in setting.keys():
             setting.pop(key)
 
-        # get FieldsTemplate name
-        tank_template_name = self._template.get_key(key).template
         # get TemplateKeyName
-        template = self.resolve_template(tank_template_name)
+        tank_template_key = self._template.get_key(key).template
+        # get Tank Template name
+        template = self.resolve_template(tank_template_key)
+
         # get all matching paths
         template_paths = self._tk.get_abstract_path(
             fields=setting,
@@ -67,12 +67,15 @@ class MikRead(AbstractMik):
 
         # filter and get matched keys from paths
         for path in template_paths:
-            fields = self._tk.get_fields_from_path(path)
-            value = fields.get(key)
+            path_fields = self._tk.get_fields_from_path(path)
+            value = path_fields.get(key)
             if value not in match:
                 match.append(value)
 
         return match
+
+    def is_publish(self):
+        return self._publish
 
     def resolve_template(self, template):
         """
@@ -82,6 +85,24 @@ class MikRead(AbstractMik):
         if self._publish:
             return template.publish
         return template.work
+
+    def set_status(self, is_publish=False):
+        self._publish = is_publish
+
+    def set_template(self, template_name):
+        template = None
+        for read_tpl in self.READ_CONFIG:
+            if template_name != read_tpl.name:
+                continue
+            template = read_tpl
+
+        if not template:
+            raise ValueError("No template with name : {}".format(template_name))
+
+        self._template = template
+
+    def update_settings(self, fields):
+        self._setting = fields
 
     # PRIVATES
     def _generate_settings(self):
@@ -95,3 +116,12 @@ class MikRead(AbstractMik):
         self._publish = False
         if "publish" in template.name().lower():
             self._publish = True
+
+    def _get_template_from_config(self, tk_template):
+        template = None
+        for read_tpl in self.READ_CONFIG:
+            if tk_template.name() == read_tpl.template.work or \
+                    tk_template.name() == read_tpl.template.publish:
+                template = read_tpl
+                self._is_publish(tk_template)
+        return template

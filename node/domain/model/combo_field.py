@@ -1,3 +1,6 @@
+from node.domain import config
+
+
 class FieldCombo(object):
 
     def __init__(self, key, mikdata):
@@ -15,19 +18,38 @@ class FieldCombo(object):
         return self._get_combo_all_dependent(self.key)
 
     def get_values(self):
-        return self.mikdata.get_values_from_key(self.key.tank_id)
+        self._get_status_combo()
+        new_fields = {}
+        combo_dependents = self.all_combos.get(self.key.tank_id).field_combo.get_dependent()
+        if not combo_dependents:
+            new_fields[self.key.tank_id] = self.mikdata.get_settings().get(self.key.tank_id)
+        else:
+            new_fields = self._get_value_from_combo(combo_dependents)
+        return self.mikdata.get_values_from_key(self.key.tank_id, new_fields)
 
     def update_dependencies(self):
+        self._get_status_combo()
         for i, combo in self.all_combos.items():
             combo_dependents = combo.field_combo.get_dependent()
-            if self.key.tank_id not in combo_dependents:
+            if i in [config.category.tank_id, config.status.tank_id]:
+                continue
+            if not combo_dependents or self.key.tank_id not in combo_dependents:
                 continue
             # get new fields with value from combo
             new_fields = self._get_value_from_combo(combo_dependents)
             values = self.mikdata.get_values_from_key(combo.key.tank_id, new_fields)
             combo.set_values(values)
 
+    def set_template(self, template_name):
+        self.mikdata.set_template(template_name)
+
     # PRIVATES
+    def _get_status_combo(self):
+        status = False
+        if "status" in self.all_combos.keys():
+            status = True if self.all_combos.get("status") == "publish" else False
+        self.mikdata.set_status(is_publish=status)
+
     def _get_preferencies_value(self):
         return self.key.preferencie if self.key.preferencie else None
 
@@ -53,7 +75,9 @@ class FieldCombo(object):
     def _get_value_from_combo(self, combos_dependent):
         _fields = {}
         for i, combo in self.all_combos.items():
-            if i not in combos_dependent:
+            if i == config.status.tank_id:
+                continue
+            elif i not in combos_dependent:
                 value = None
             else:
                 value = combo.get_value() if combo.get_value() else None
