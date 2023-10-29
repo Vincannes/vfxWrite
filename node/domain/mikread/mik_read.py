@@ -14,8 +14,19 @@ class MikRead(AbstractMik):
         self._tk = self.tank_wrapper()
         self._publish = False
 
-        self._template = self.get_template()
+        self._template = self.get_path_template()
         self._setting = self._generate_settings()
+
+    def change_setting(self):
+        _setting = self._setting.copy()
+        list_mandatories = [
+            tank_id for tank_id, field_key in self._template.tokens.items() if field_key.is_mandatory
+        ]
+        for key in self._setting.keys():
+            if key in list_mandatories:
+                continue
+            _setting.pop(key)
+        self._setting = _setting
 
     def generate_path(self):
         return self._tk.build_path_from_template(
@@ -24,6 +35,9 @@ class MikRead(AbstractMik):
         )
 
     def get_template(self):
+        return self._template
+
+    def get_path_template(self):
         """
         Check if path template belong to READ_CONFIG
         :return: FieldsTemplate
@@ -48,7 +62,7 @@ class MikRead(AbstractMik):
             else:
                 if value is None:
                     continue
-                setting[token] = self._setting[token]
+                setting[token] = fields[token]
 
         # remove key from setting because we look for this one
         if key in setting.keys():
@@ -71,7 +85,7 @@ class MikRead(AbstractMik):
             value = path_fields.get(key)
             if value not in match:
                 match.append(value)
-
+        print(key, match)
         return match
 
     def is_publish(self):

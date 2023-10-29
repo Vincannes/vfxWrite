@@ -1,0 +1,120 @@
+template_name <node.domain.config.models.FieldsTemplate object at 0x000002461E36B288>
+
+Sequence
+{'Sequence': 'sh'}
+{}
+['D:\\Desk\\python\\Projects\\sequence\\seq',
+ 'D:\\Desk\\python\\Projects\\sequence\\sh',
+ 'D:\\Desk\\python\\Projects\\sequence\\test']
+match ['seq', 'sh', 'test']
+comb1 ['seq', 'sh', 'test']
+comb2 ['seq', 'sh', 'test']
+
+Shot
+{'Sequence': 'sh', 'Shot': None}
+{'Sequence': 'sh'}
+['D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010',
+ 'D:\\Desk\\python\\Projects\\sequence\\sh\\sh_020',
+ 'D:\\Desk\\python\\Projects\\sequence\\sh\\sh_030']
+match ['sh_010', 'sh_020', 'sh_030']
+comb1 ['sh_010', 'sh_020', 'sh_030']
+comb2 ['sh_010', 'sh_020', 'sh_030']
+
+Task
+{'Sequence': 'sh', 'Shot': 'sh_010', 'Task': None}
+{'Sequence': 'sh', 'Shot': 'sh_010'}
+['D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\cmp',
+ 'D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\common',
+ 'D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\env',
+ 'D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\vzero']
+match ['cmp', 'common', 'env', 'vzero']
+comb1 ['cmp', 'common', 'env', 'vzero']
+comb2 ['cmp', 'common', 'env', 'vzero']
+
+write_node
+{'Sequence': 'sh', 'Shot': 'sh_010', 'Task': 'cmp', 'write_node': None}
+{'Sequence': 'sh', 'Shot': 'sh_010', 'Task': 'cmp'}
+['D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\cmp\\image\\elements\\Write1']
+match ['Write1']
+comb1 ['Write1']
+comb2 ['Write1', 'out']
+
+variant
+{'Sequence': 'sh',
+ 'Shot': 'sh_010',
+ 'Task': 'cmp',
+ 'variant': None,
+ 'write_node': 'Write1'}
+{'Sequence': 'sh', 'Shot': 'sh_010', 'Task': 'cmp', 'write_node': 'Write1'}
+['D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\cmp\\image\\elements\\Write1\\sh_010-cmp-base-nkelem-Write1-v001-aces-exr\\sh_010-cmp-base-nkelem-Write1-v001-aces.1001.exr',
+ 'D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\cmp\\image\\elements\\Write1\\sh_010-cmp-base-nkelem-Write1-v001-aces-exr\\sh_010-cmp-base-nkelem-Write1-v001-aces.1002.exr',
+ 'D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\cmp\\image\\elements\\Write1\\sh_010-cmp-base-nkelem-Write1-v001-aces-exr\\sh_010-cmp-base-nkelem-Write1-v001-aces.1003.exr',
+ 'D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\cmp\\image\\elements\\Write1\\sh_010-cmp-base-nkelem-Write1-v001-aces-exr\\sh_010-cmp-base-nkelem-Write1-v001-aces.1004.exr',
+ 'D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\cmp\\image\\elements\\Write1\\sh_010-cmp-base-nkelem-Write1-v001-aces-exr\\sh_010-cmp-base-nkelem-Write1-v001-aces.1005.exr',
+ 'D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\cmp\\image\\elements\\Write1\\sh_010-cmp-base-nkelem-Write1-v001-aces-exr\\sh_010-cmp-base-nkelem-Write1-v001-aces.1006.exr',
+ 'D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\cmp\\image\\elements\\Write1\\sh_010-cmp-base-nkelem-Write1-v001-aces-exr\\sh_010-cmp-base-nkelem-Write1-v001-aces.1007.exr',
+ 'D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\cmp\\image\\elements\\Write1\\sh_010-cmp-base-nkelem-Write1-v001-aces-exr\\sh_010-cmp-base-nkelem-Write1-v001-aces.1008.exr',
+ 'D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\cmp\\image\\elements\\Write1\\sh_010-cmp-base-nkelem-Write1-v001-aces-exr\\sh_010-cmp-base-nkelem-Write1-v001-aces.1009.exr',
+ 'D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\cmp\\image\\elements\\Write1\\sh_010-cmp-base-nkelem-Write1-v001-aces-exr\\sh_010-cmp-base-nkelem-Write1-v001-aces.1010.exr']
+match ['base']
+comb1 ['base']
+comb2 ['base']
+comb2 ['nkelem']
+
+version
+{'Sequence': 'sh',
+ 'Shot': 'sh_010',
+ 'Task': 'cmp',
+ 'render_source': None,
+ 'variant': 'base',
+ 'version': None,
+ 'write_node': 'Write1'}
+{'Sequence': 'sh',
+ 'Shot': 'sh_010',
+ 'Task': 'cmp',
+ 'variant': 'base',
+ 'write_node': 'Write1'}
+['D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\cmp\\image\\elements\\Write1\\sh_010-cmp-base-nkelem-Write1-v001-aces-exr']
+match ['1']
+comb1 ['1']
+comb2 ['1', '2']
+
+colorspace
+{'Sequence': 'sh',
+ 'Shot': 'sh_010',
+ 'Task': 'cmp',
+ 'colorspace': None,
+ 'render_source': None,
+ 'variant': 'base',
+ 'version': None,
+ 'write_node': 'Write1'}
+{'Sequence': 'sh',
+ 'Shot': 'sh_010',
+ 'Task': 'cmp',
+ 'variant': 'base',
+ 'write_node': 'Write1'}
+['D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\cmp\\image\\elements\\Write1\\sh_010-cmp-base-nkelem-Write1-v001-aces-exr']
+match ['aces']
+comb1 ['aces']
+comb2 ['aces']
+
+ext_render_nuke
+{'Sequence': 'sh',
+ 'Shot': 'sh_010',
+ 'Task': 'cmp',
+ 'colorspace': None,
+ 'ext_render_nuke': None,
+ 'render_source': None,
+ 'variant': 'base',
+ 'version': '1',
+ 'write_node': 'Write1'}
+{'Sequence': 'sh',
+ 'Shot': 'sh_010',
+ 'Task': 'cmp',
+ 'variant': 'base',
+ 'version': '1',
+ 'write_node': 'Write1'}
+['D:\\Desk\\python\\Projects\\sequence\\sh\\sh_010\\cmp\\image\\elements\\Write1\\sh_010-cmp-base-nkelem-Write1-v001-aces-exr']
+match ['exr']
+comb1 ['exr']
+comb2 ['exr']

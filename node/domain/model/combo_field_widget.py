@@ -8,7 +8,10 @@ class FieldComboWidget(QtWidgets.QHBoxLayout):
     WRITE_KEYS_EDITABLE = [
         config.category,
         config.colorspace,
-        config.extension
+        config.extension,
+    ]
+
+    READ_KEYS_NOTEDITABLE = [
     ]
 
     def __init__(self, key, mikdata, node, combo_template, is_editable=False):
@@ -25,12 +28,11 @@ class FieldComboWidget(QtWidgets.QHBoxLayout):
         self.label_widget = QtWidgets.QLabel(self.key.label)
 
         self.label_widget.setMaximumWidth(100)
-        if not is_editable and key not in self.WRITE_KEYS_EDITABLE:
-            self.combo.setEnabled(False)
+        if not is_editable and key not in self.WRITE_KEYS_EDITABLE or key in self.READ_KEYS_NOTEDITABLE:
+            self.combo_widget.setEnabled(False)
 
         self.addWidget(self.label_widget)
         self.addWidget(self.combo_widget)
-
 
     @property
     def widget(self):
@@ -42,13 +44,10 @@ class FieldComboWidget(QtWidgets.QHBoxLayout):
 
     def initialize(self):
         self.set_default_value()
-        items = [self.combo_widget.itemText(i) for i in range(self.combo_widget.count())]
-
         self.set_template(self.combo_template.name)
 
         if self.key.tank_id not in [config.category.tank_id, config.status.tank_id]:
             self.set_values()
-            self.set_value()
 
     def connect_dependencies(self, combos):
         self.field_combo.all_combos = combos
@@ -91,6 +90,8 @@ class FieldComboWidget(QtWidgets.QHBoxLayout):
         if value in self.values:
             self.combo_widget.setCurrentIndex(self.values.index(value))
         # if value already in Combobox
+        elif value not in self.values:
+            return
         elif value in [self.combo_widget.itemText(i) for i in range(self.combo_widget.count())]:
             self.values = self.values + (value,)
             self.combo_widget.setCurrentIndex(self.values.index(value))
@@ -100,12 +101,14 @@ class FieldComboWidget(QtWidgets.QHBoxLayout):
 
     def set_values(self, values=None):
         if self.key.tank_id == config.category.tank_id:
-            pass
+            return
         if values is None:
             values = self.field_combo.get_values()
+
         self.values = values
         self.combo_widget.clear()
-        if len(values) == 0:
-            pass
-        self.combo_widget.addItems(values)
 
+        if len(values) == 0:
+            return
+        self.combo_widget.addItems(values)
+        self.set_value()
