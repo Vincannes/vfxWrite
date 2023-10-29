@@ -19,9 +19,11 @@ class TankWrapper(object):
     def get_template_from_path(self, path):
         try:
             path = re.sub(REGEX_FRAME, '.%04d.', path)
-        except:
+        except Exception as e:
+            print(e)
             pass
         path = path.replace("%04d", "####")
+        path = path.replace("\\", "/")  # thank you Windobe
         return self._tk.template_from_path(path)
 
     def get_template_keys(self, template):

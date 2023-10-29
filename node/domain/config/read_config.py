@@ -10,11 +10,11 @@ from node.domain.config.models import FieldsTemplate, FieldKey
 
 ## KEYS
 
-sequence = FieldKey("Sequence", "Sequence Name", template=sequence_root)
-shot = FieldKey("Shot", "Shot Name", template=shot_root, dependencies=["Sequence"])
+sequence = FieldKey("Sequence", "Sequence Name", template=sequence_root, is_mandatory=True)
+shot = FieldKey("Shot", "Shot Name", template=shot_root, dependencies=["Sequence"], is_mandatory=True)
 
-task = FieldKey("Task", "Task", template=step_root, dependencies=["Shot"])
-status = FieldKey("status", "Status", values=('wip', 'publish'), preferencie="wip")
+task = FieldKey("Task", "Task", template=step_root, dependencies=["Shot"], is_mandatory=False)
+status = FieldKey("status", "Status", values=('wip', 'publish'), preferencie="wip", is_mandatory=True)
 
 # "Footage - Plate" specific fields
 task_plate = FieldKey("Task", "Task", template=footage_root, dependencies=["Shot"])
@@ -40,18 +40,17 @@ extension_nuke_shot = FieldKey("ext_render_nuke", "Extension", values=('jpg', 'd
 
 # "2D - Nuke Shot Elements" specific fields
 category_nuke_element = FieldKey("render_source", "Category", values=('nkelem', ), preferencie='nkelem') #TODO
-variant_nuke_element = FieldKey(tank_id='variant', label='Scene variant', template=nuke_shot_element_render_folder,
-                                dependencies=["write_node"])
-version_nuke_element = FieldKey("version", "Version", template=nuke_shot_element_render_folder,
-                                dependencies=["variant"])
 colorspace_nuke_element = FieldKey("colorspace", "Colorspace", values=("test", "aces", "acescg"), preferencie="aces",
                                     template=nuke_shot_element_render_folder, dependencies=["variant"])
 write_nuke_element = FieldKey("write_node", "Write Name", template=nuke_shot_element_render_root,
                               dependencies=["Task"])
-
 extension_nuke_element = FieldKey("ext_render_nuke", "Extension", values=('jpg', 'dpx', 'exr', 'png', 'tiff', 'tga'),
                                    preferencie="exr", template=nuke_shot_element_render_folder,
                                    dependencies=["version"])
+version_nuke_element = FieldKey("version", "Version", template=nuke_shot_element_render_folder,
+                                dependencies=["variant"])
+variant_nuke_element = FieldKey(tank_id='variant', label='Scene variant', template=nuke_shot_element_render_sequence,
+                                dependencies=["write_node"])
 
 
 ## TEMPLATES

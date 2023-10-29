@@ -95,12 +95,12 @@ class MikReadNodeWidget(QtWidgets.QWidget):
     @QtCore.Slot(object)
     def update_combo_widget(self, index, combo_box):
         template_name = self.source_combo.currentData()
+        print(template_name)
+        # combo_box.field_combo.mikdata.change_setting()
         combo_box.field_combo.update_dependencies()
 
     @QtCore.Slot(int)
     def update_setting_fields(self, index):
-        template_name = self.source_combo.itemData(index)
-        print("template_name", template_name)
         self._clear_layout(self.setting_layout)
         self._build_settings()
 
@@ -132,8 +132,11 @@ class MikReadNodeWidget(QtWidgets.QWidget):
         self._combo_fields = {}
         template_fields = self.source_combo.currentData()
         for key_name, key in template_fields.tokens.items():
-            print("")
-            combo = FieldComboWidget(key, self.mikread, self.node, template_fields, True)
+            mik_read = self.mikread
+            if not first_instance:
+                mik_read.set_template(template_fields.name)
+                mik_read.change_setting()
+            combo = FieldComboWidget(key, mik_read, self.node, template_fields, True)
             combo.widget.activated.connect(
                 lambda index, cb=combo: self.update_combo_widget(index, cb)
             )
@@ -142,10 +145,6 @@ class MikReadNodeWidget(QtWidgets.QWidget):
             combo.initialize()
             self.setting_layout.addLayout(combo)
         self.mainLayout.addLayout(self.setting_layout)
-
-        # if not first_instance:
-        #     for combo in self._combo_fields.values():
-        #         combo.field_combo.update_dependencies()
 
     def _build_foot(self):
         self.computedPath.setReadOnly(True)
