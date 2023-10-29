@@ -8,14 +8,18 @@ class FieldComboWidget(QtWidgets.QHBoxLayout):
     WRITE_KEYS_EDITABLE = [
         config.category,
         config.colorspace,
-        config.extension
+        config.extension,
     ]
 
-    def __init__(self, key, mikdata, node, is_editable=False):
+    READ_KEYS_NOTEDITABLE = [
+    ]
+
+    def __init__(self, key, mikdata, node, combo_template, is_editable=False):
         super(self.__class__, self).__init__()
 
         self.key = key
         self.node = node
+        self.combo_template = combo_template
 
         self.field_combo = FieldCombo(key, mikdata)
         self.values = self.field_combo.values
@@ -24,15 +28,11 @@ class FieldComboWidget(QtWidgets.QHBoxLayout):
         self.label_widget = QtWidgets.QLabel(self.key.label)
 
         self.label_widget.setMaximumWidth(100)
-        if not is_editable and key not in self.WRITE_KEYS_EDITABLE:
-            self.combo.setEnabled(False)
+        if not is_editable and key not in self.WRITE_KEYS_EDITABLE or key in self.READ_KEYS_NOTEDITABLE:
+            self.combo_widget.setEnabled(False)
 
         self.addWidget(self.label_widget)
         self.addWidget(self.combo_widget)
-
-        self.set_default_value()
-        self.set_values()
-        self.set_value()
 
     @property
     def widget(self):
@@ -42,8 +42,24 @@ class FieldComboWidget(QtWidgets.QHBoxLayout):
     def dependent(self):
         return self.field_combo.get_dependent()
 
+    def initialize(self):
+        self.set_default_value()
+        self.set_template(self.combo_template.name)
+
+        if self.key.tank_id not in [config.category.tank_id, config.status.tank_id]:
+            self.set_values()
+
     def connect_dependencies(self, combos):
         self.field_combo.all_combos = combos
+
+    def set_template(self, template_name):
+        self.field_combo.set_template(template_name)
+
+    def get_value(self):
+        """
+        :return:
+        """
+        return str(self.combo_widget.currentText())
 
     def set_default_value(self):
         """
@@ -74,6 +90,8 @@ class FieldComboWidget(QtWidgets.QHBoxLayout):
         if value in self.values:
             self.combo_widget.setCurrentIndex(self.values.index(value))
         # if value already in Combobox
+        elif value not in self.values:
+            return
         elif value in [self.combo_widget.itemText(i) for i in range(self.combo_widget.count())]:
             self.values = self.values + (value,)
             self.combo_widget.setCurrentIndex(self.values.index(value))
@@ -82,17 +100,15 @@ class FieldComboWidget(QtWidgets.QHBoxLayout):
             self.combo_widget.addItems([value])
 
     def set_values(self, values=None):
+        if self.key.tank_id == config.category.tank_id:
+            return
         if values is None:
             values = self.field_combo.get_values()
+
         self.values = values
         self.combo_widget.clear()
+
         if len(values) == 0:
-            pass
+            return
         self.combo_widget.addItems(values)
-
-    def get_value(self):
-        """
-        :return:
-        """
-        return str(self.combo_widget.currentText())
-
+        self.set_value()

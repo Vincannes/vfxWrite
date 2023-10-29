@@ -6,6 +6,7 @@ import sgtk
 
 REGEX_FRAME = r"\.(\d+)\."
 
+
 class TankWrapper(object):
 
     def __init__(self):
@@ -18,9 +19,11 @@ class TankWrapper(object):
     def get_template_from_path(self, path):
         try:
             path = re.sub(REGEX_FRAME, '.%04d.', path)
-        except:
+        except Exception as e:
+            print(e)
             pass
         path = path.replace("%04d", "####")
+        path = path.replace("\\", "/")  # thank you Windobe
         return self._tk.template_from_path(path)
 
     def get_template_keys(self, template):
@@ -33,7 +36,7 @@ class TankWrapper(object):
             template = self.get_template_from_path(path)
         if isinstance(template, str):
             template = self.get_template(template)
-        result_string = path.replace("\\", "/")# thank you Windobe
+        result_string = path.replace("\\", "/")  # thank you Windobe
         try:
             result_string = re.sub(REGEX_FRAME, '.%04d.', result_string)
         except:

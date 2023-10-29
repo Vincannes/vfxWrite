@@ -1,9 +1,23 @@
 import nuke
 from pprint import pprint
-from PySide2 import QtWidgets, QtCore, QtGui
+from PySide2 import QtWidgets, QtCore
+
+# TO REMOVE
+import importlib
+# from node.domain import mikread
+from node.domain.config import read_config
+from node.domain.mikread import mik_read
+from node.domain.model import combo_field
+from node.domain.model import combo_field_widget
+# importlib.reload(mikread)
+importlib.reload(mik_read)
+importlib.reload(read_config)
+importlib.reload(combo_field)
+importlib.reload(combo_field_widget)
+# END TO REMOVE
 
 from node.domain import config
-from node.domain.mikread import MikRead
+from node.domain.mikread.mik_read import MikRead
 from node.domain.model.combo_field_widget import FieldComboWidget
 
 
@@ -49,7 +63,7 @@ class MikReadNodeWidget(QtWidgets.QWidget):
         self.mainLayout.addWidget(titleWidget)
         self._build_head()
         self.mainLayout.addSpacing(self.SPACE_WIDGET_SIZE)
-        self._build_settings()
+        self._build_settings(first_instance=True)
         self.mainLayout.addSpacing(self.SPACE_WIDGET_SIZE)
         self._build_foot()
         self.setLayout(self.mainLayout)
@@ -62,7 +76,8 @@ class MikReadNodeWidget(QtWidgets.QWidget):
 
     def set_connections(self):
         self.source_combo.currentIndexChanged.connect(self.update_setting_fields)
-        self.pathChanged.connect(self.update_write_path_widget)
+        # self.pathChanged.connect(self.update_write_path_widget)
+        self.refresh_button.clicked.connect(self.update_write_path_widget)
 
     # CONNECTIONS
 
@@ -72,19 +87,20 @@ class MikReadNodeWidget(QtWidgets.QWidget):
         for tank_id, combo in self._combo_fields.items():
             new_fields[tank_id] = combo.get_value()
         pprint(new_fields)
-        # self.mikwrite.update_settings(new_fields)
-        # path = self.mikread.generate_path()
-        # self.computedPath.setText(path)
+        self.mikread.set_template(self.source_combo.currentData().name)
+        self.mikread.update_settings(new_fields)
+        path = self.mikread.generate_path()
+        self.computedPath.setText(path)
 
     @QtCore.Slot(object)
     def update_combo_widget(self, index, combo_box):
         template_name = self.source_combo.currentData()
-        print(template_name.name)
+        print(template_name)
+        # combo_box.field_combo.mikdata.change_setting()
         combo_box.field_combo.update_dependencies()
 
     @QtCore.Slot(int)
     def update_setting_fields(self, index):
-        template_name = self.source_combo.itemData(index)
         self._clear_layout(self.setting_layout)
         self._build_settings()
 
@@ -107,23 +123,28 @@ class MikReadNodeWidget(QtWidgets.QWidget):
     def _build_source_combo(self):
         for key in config.READ_CONFIGS:
             self.source_combo.addItem(key.name, key)
+        self.source_combo.setCurrentIndex(
+            config.READ_CONFIGS.index(config.tpl_nuke_shot)
+        )
 
-    def _build_settings(self):
+    def _build_settings(self, first_instance=False):
         # reset self._combo_fields
         self._combo_fields = {}
         template_fields = self.source_combo.currentData()
         for key_name, key in template_fields.tokens.items():
-            combo = FieldComboWidget(key, self.mikread, self.node, True)
+            mik_read = self.mikread
+            if not first_instance:
+                mik_read.set_template(template_fields.name)
+                mik_read.change_setting()
+            combo = FieldComboWidget(key, mik_read, self.node, template_fields, True)
             combo.widget.activated.connect(
                 lambda index, cb=combo: self.update_combo_widget(index, cb)
             )
-            # combo.
             self._combo_fields[key.tank_id] = combo
+            combo.connect_dependencies(self._combo_fields)
+            combo.initialize()
             self.setting_layout.addLayout(combo)
         self.mainLayout.addLayout(self.setting_layout)
-
-        for combo in self._combo_fields.values():
-            combo.connect_dependencies(self._combo_fields)
 
     def _build_foot(self):
         self.computedPath.setReadOnly(True)
