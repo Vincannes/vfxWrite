@@ -10,16 +10,16 @@ class MikWriteNode(AbstractMikNode):
     def __init__(self, out=False, inpanel=False):
         AbstractMikNode.__init__(self, nuke.createNode('Write', inpanel=inpanel))
 
-        self._out = out
+        self.path = out
         self.module = AbstractMikNode.makeImportScript('node.domain.mikwrite.mik_write_widget')
 
     def create_custom_knob(self):
+        path_str = "{}".format(self.path)
         return nuke.PyCustom_Knob(
             self.GUI_WIDGET_NAME,
             '',
-            "{}.MikWriteNodeWidget(is_out={})".format(self.module, self._out)
+            "{}.MikWriteNodeWidget(path='{}')".format(self.module, path_str)
         )
-
     def node_settings(self):
-        if self._out:
+        if self.path:
             self.node.setName("out")

@@ -37,6 +37,10 @@ class MikWriteNodeWidget(QtWidgets.QWidget):
         self.elementButton = QtWidgets.QRadioButton('Element')
         self.shotButton = QtWidgets.QRadioButton('Shot' if self.isCompShot() else 'Asset')
 
+        template_write = config.tpl_write_nuke
+        self.source_combo = QtWidgets.QComboBox()
+        self.source_combo.addItem(template_write.name, template_write)
+
         self.build_ui()
         self.set_connections()
         self.update_type_source_buttons(is_out)
@@ -64,8 +68,6 @@ class MikWriteNodeWidget(QtWidgets.QWidget):
     def set_connections(self):
         self.elementButton.pressed.connect(lambda: self.update_type_source_buttons(isShot=False))
         self.shotButton.pressed.connect(lambda: self.update_type_source_buttons(isShot=True))
-        # self.elementButton.toggled.connect(self.pathChanged)
-        # self.shotButton.toggled.connect(self.pathChanged)
         self.pathChanged.connect(self.update_write_path_widget)
 
     # CONNECTIONS
@@ -106,8 +108,13 @@ class MikWriteNodeWidget(QtWidgets.QWidget):
         self.mainLayout.addLayout(vlayout)
 
     def _build_settings(self):
-        for key in config.WRITE_CONFIGS:
-            combo = FieldComboWidget(key, self.mikwrite, self.node)
+        for tank_id, key in config.tpl_write_nuke.tokens.items():
+            combo = FieldComboWidget(
+                key=key, 
+                mikdata=self.mikwrite, 
+                node=self.node, 
+                combo_template=self.source_combo
+            )
             combo.widget.activated.connect(self.pathChanged)
             self._combo_fields[key.tank_id] = combo
             self.setting_layout.addLayout(combo)

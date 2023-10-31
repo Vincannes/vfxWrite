@@ -1,5 +1,10 @@
 from pprint import pprint
 
+import importlib
+from node.adapters import tank_wrapper
+importlib.reload(tank_wrapper)
+
+
 from node.adapters.tank_wrapper import TankWrapper
 from node.domain.ports.abs_mik import AbstractMik
 
@@ -56,6 +61,7 @@ class MikWrite(AbstractMik):
         fields = self._tk.get_fields_from_path(
             self._path,
         )
+        print(fields)
 
         for key in template_keys:
             if key not in fields.keys():

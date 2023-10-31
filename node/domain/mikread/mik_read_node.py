@@ -14,10 +14,11 @@ class MikReadNode(AbstractMikNode):
         self.module = AbstractMikNode.makeImportScript('node.domain.mikread.mik_read_widget')
 
     def create_custom_knob(self):
+        path_str = "{}".format(self.path)
         return nuke.PyCustom_Knob(
             self.GUI_WIDGET_NAME,
             '',
-            "{}.MikReadNodeWidget(path='{}')".format(self.module, self.path)
+            "{}.MikReadNodeWidget(path='{}')".format(self.module, path_str)
         )
 
     def node_settings(self):
